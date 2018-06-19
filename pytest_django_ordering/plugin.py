@@ -10,7 +10,10 @@ def pytest_collection_modifyitems(items):
         marker = test.get_marker('django_db')
         if marker:
             validate_django_db(marker)
-            return marker.transaction
+            # As of pytest 3.6.1 or maybe 3.6 'transaction' is not longer a property of
+            # the MarkInfo at this execution point anyway, so if we are in that context
+            # then fallback to checking the kwargs for the presence of a transaction test case.
+            return getattr(marker, 'transaction',  'transaction' in marker.kwargs)
 
         return None
 
